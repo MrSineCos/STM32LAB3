@@ -1,0 +1,2 @@
+input_button.c:18:6:buttonReading	16	static
+input_button.c:45:5:buttonPressed	16	static
