@@ -26,7 +26,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/processing_fsm.h ../Core/Inc/input_button.h \
  ../Core/Inc/main.h ../Core/Inc/software_timer.h \
  ../Core/Inc/output_traffic.h ../Core/Inc/output_led7seg.h \
- ../Core/Inc/software_timer.h
+ ../Core/Inc/software_timer.h ../Core/Inc/manual_fsm.h
 
 ../Core/Inc/main.h:
 
@@ -91,3 +91,5 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/output_led7seg.h:
 
 ../Core/Inc/software_timer.h:
+
+../Core/Inc/manual_fsm.h:

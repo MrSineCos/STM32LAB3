@@ -1,0 +1,3 @@
+manual_fsm.c:11:6:fsmInitMan	8	static
+manual_fsm.c:16:6:fsmReInitMan	16	static
+manual_fsm.c:61:6:fsmManua	8	static

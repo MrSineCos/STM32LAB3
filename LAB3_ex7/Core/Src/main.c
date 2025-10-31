@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "processing_fsm.h"
 #include "software_timer.h"
+#include "manual_fsm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -93,6 +94,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
   led7segInit();
   fsmInit();
+  fsmInitMan();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -102,6 +104,7 @@ int main(void)
     /* USER CODE END WHILE */
 	  led7segScanning();
 	  fsmProcessing();
+	  fsmManua();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
