@@ -7,6 +7,8 @@
 C_SRCS += \
 ../Core/Src/input_button.c \
 ../Core/Src/main.c \
+../Core/Src/output_led7seg.c \
+../Core/Src/output_traffic.c \
 ../Core/Src/processing_fsm.c \
 ../Core/Src/software_timer.c \
 ../Core/Src/stm32f1xx_hal_msp.c \
@@ -18,6 +20,8 @@ C_SRCS += \
 OBJS += \
 ./Core/Src/input_button.o \
 ./Core/Src/main.o \
+./Core/Src/output_led7seg.o \
+./Core/Src/output_traffic.o \
 ./Core/Src/processing_fsm.o \
 ./Core/Src/software_timer.o \
 ./Core/Src/stm32f1xx_hal_msp.o \
@@ -29,6 +33,8 @@ OBJS += \
 C_DEPS += \
 ./Core/Src/input_button.d \
 ./Core/Src/main.d \
+./Core/Src/output_led7seg.d \
+./Core/Src/output_traffic.d \
 ./Core/Src/processing_fsm.d \
 ./Core/Src/software_timer.d \
 ./Core/Src/stm32f1xx_hal_msp.d \

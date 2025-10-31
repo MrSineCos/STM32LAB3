@@ -91,6 +91,7 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
+  led7segInit();
   fsmInit();
   /* USER CODE END 2 */
 
@@ -99,6 +100,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	  led7segScanning();
 	  fsmProcessing();
     /* USER CODE BEGIN 3 */
   }
