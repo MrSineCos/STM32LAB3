@@ -121,9 +121,7 @@ void fsmProcessing(void) {
                 }
             }
 
-            if (buttonPressed(0)) {
-                fsmReInit(FSM_RED_MOD);
-            }
+            // Manual mode handled in manual_fsm; ignore button0 here
             break;
 
         case FSM_RED_MOD:

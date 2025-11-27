@@ -1,4 +1,5 @@
-output_led7seg.c:18:13:led7segDisplay	32	static
-output_led7seg.c:61:6:led7segInit	8	static
-output_led7seg.c:69:6:led7segUpdate	16	static
-output_led7seg.c:74:6:led7segScanning	8	static
+output_led7seg.c:19:13:led7segDisplay	32	static
+output_led7seg.c:62:6:led7segInit	8	static
+output_led7seg.c:70:6:led7segUpdate	16	static
+output_led7seg.c:75:6:led7segScanning	8	static
+output_led7seg.c:98:6:led7segSetEnabled	16	static

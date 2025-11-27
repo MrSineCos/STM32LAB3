@@ -11,6 +11,7 @@ int led7segNumbers[LED7SEG_BLOCK_NUMBER] = {0};
 static int led7segIndex = 0;
 static int led7segOffset = 0;
 static uint16_t led7segPins[LED7SEG_NUMBER] = {LED7SEG_0_Pin, LED7SEG_1_Pin, LED7SEG_2_Pin, LED7SEG_3_Pin};
+static int led7segEnabled = 1;
 
 static uint16_t led7segNum0s[11] = {0xBF, 0x86, 0xDB, 0xCF, 0xE6, 0xED, 0xFD, 0x87, 0xFF, 0xEF, 0x00};
 static uint16_t led7segNum1s[11] = {0x40, 0x79, 0x24, 0x30, 0x19, 0x12, 0x02, 0x78, 0x00, 0x10, 0xFF};
@@ -72,7 +73,15 @@ void led7segUpdate(int num, int index) {
 }
 
 void led7segScanning(void) {
-    led7segDisplay(led7segIndex, led7segOffset);
+    if (!led7segEnabled) {
+        HAL_GPIO_WritePin(GPIOB, led7segPins[0], GPIO_PIN_SET);
+        HAL_GPIO_WritePin(GPIOB, led7segPins[1], GPIO_PIN_SET);
+        HAL_GPIO_WritePin(GPIOB, led7segPins[2], GPIO_PIN_SET);
+        HAL_GPIO_WritePin(GPIOB, led7segPins[3], GPIO_PIN_SET);
+        // still advance timing to keep blink cadence via timers
+    } else {
+        led7segDisplay(led7segIndex, led7segOffset);
+    }
     if (timerFlags[0] == 1) {
         timerSet(LED7SEG_SCANNING_DURATION / TIMER_DURATION, 0);
         led7segOffset++;
@@ -84,5 +93,9 @@ void led7segScanning(void) {
             led7segIndex = 0;
         }
     }
+}
+
+void led7segSetEnabled(int enabled) {
+    led7segEnabled = enabled ? 1 : 0;
 }
 

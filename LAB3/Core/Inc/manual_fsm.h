@@ -23,5 +23,8 @@ void fsmInitMan(void);
 void fsmReInitMan(enum FSM_STATE1 stateMan);
 void fsmManua(void);
 
+// Returns 1 when in any manual adjustment mode, else 0
+int fsmManualIsActive(void);
+
 
 #endif /* INC_MANUAL_FSM_H_ */

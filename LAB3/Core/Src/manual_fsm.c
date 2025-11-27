@@ -6,50 +6,79 @@
  */
 
 #include "manual_fsm.h"
+#include "processing_fsm.h"
+#include "output_led7seg.h"
+
 enum FSM_STATE1 fsmStateMan = 0;
+static uint8_t manualActive = 0;
+static uint8_t blinkOn = 1;
+static uint8_t confirmed = 0;
+static int manualValue = 0;
+
+static int led7segMaxValue(void) {
+    int maxv = 1;
+    for (int i = 0; i < LED7SEG_DIGIT_NUMBER; i++) maxv *= 10;
+    return maxv - 1;
+}
+
+int fsmManualIsActive(void) {
+    return manualActive;
+}
 
 void fsmInitMan(void) {
-    trafficInit();
+    // Do not reset durations here
     fsmReInitMan(FSM_NORMAL_MAN);
 }
 
 void fsmReInitMan(enum FSM_STATE1 stateMan) {
     switch (stateMan) {
         case FSM_NORMAL_MAN:
-            timerSet(TRAFFIC_SECOND_DURATION / TIMER_DURATION, 1);
-            timerSet(trafficRedDuration * TRAFFIC_SECOND_DURATION / TIMER_DURATION, 2);
-            timerSet(trafficGreenDuration * TRAFFIC_SECOND_DURATION / TIMER_DURATION, 3);
-            led7segNumbers[0] = trafficRedDuration;
-            led7segNumbers[1] = trafficGreenDuration;
-            trafficReInit(TRAFFIC_RED, 0);
-            trafficReInit(TRAFFIC_GREEN, 1);
+            manualActive = 0;
+            confirmed = 0;
+            blinkOn = 1;
+            led7segSetEnabled(1);
             fsmStateMan = FSM_NORMAL_MAN;
             break;
 
         case FSM_RED_MAN:
+            manualActive = 1;
+            confirmed = 0;
+            blinkOn = 1;
+            manualValue = trafficRedDuration;
+            led7segNumbers[0] = manualValue;
+            led7segNumbers[1] = manualValue;
+            trafficReInit(TRAFFIC_RED, 0);
+            trafficReInit(TRAFFIC_RED, 1);
+            led7segSetEnabled(1);
             timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
-            led7segNumbers[0] = 2;
-            led7segNumbers[1] = trafficRedDuration;
-            trafficReInit(TRAFFIC_OFF, 0);
-            trafficReInit(TRAFFIC_OFF, 1);
             fsmStateMan = FSM_RED_MAN;
             break;
 
         case FSM_AMBER_MAN:
+            manualActive = 1;
+            confirmed = 0;
+            blinkOn = 1;
+            manualValue = trafficAmberDuration;
+            led7segNumbers[0] = manualValue;
+            led7segNumbers[1] = manualValue;
+            trafficReInit(TRAFFIC_AMBER, 0);
+            trafficReInit(TRAFFIC_AMBER, 1);
+            led7segSetEnabled(1);
             timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
-            led7segNumbers[0] = 3;
-            led7segNumbers[1] = trafficAmberDuration;
-            trafficReInit(TRAFFIC_OFF, 0);
-            trafficReInit(TRAFFIC_OFF, 1);
             fsmStateMan = FSM_AMBER_MAN;
             break;
 
         case FSM_GREEN_MAN:
+            manualActive = 1;
+            confirmed = 0;
+            blinkOn = 1;
+            manualValue = trafficGreenDuration;
+            led7segNumbers[0] = manualValue;
+            led7segNumbers[1] = manualValue;
+            trafficReInit(TRAFFIC_GREEN, 0);
+            trafficReInit(TRAFFIC_GREEN, 1);
+            led7segSetEnabled(1);
             timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
-            led7segNumbers[0] = 4;
-            led7segNumbers[1] = trafficGreenDuration;
-            trafficReInit(TRAFFIC_OFF, 0);
-            trafficReInit(TRAFFIC_OFF, 1);
             fsmStateMan = FSM_GREEN_MAN;
             break;
 
@@ -61,192 +90,122 @@ void fsmReInitMan(enum FSM_STATE1 stateMan) {
 void fsmManua(void) {
     switch (fsmStateMan) {
         case FSM_NORMAL_MAN:
-            if (timerFlags[1] == 1) {
-                timerSet(TRAFFIC_SECOND_DURATION / TIMER_DURATION, 1);
-                led7segNumbers[0]--;
-                if (led7segNumbers[0] < 0) led7segNumbers[0] = 0;
-                led7segNumbers[1]--;
-                if (led7segNumbers[1] < 0) led7segNumbers[1] = 0;
+            // Wait for main to gate or detect button0; keep idle here
+            if (buttonPressed(0)) {
+                fsmReInitMan(FSM_RED_MAN);
             }
-
-            if (timerFlags[2] == 1) {
-                switch (trafficState[0]) {
-                    case TRAFFIC_RED:
-                        timerSet(trafficGreenDuration * TRAFFIC_SECOND_DURATION / TIMER_DURATION, 2);
-                        led7segNumbers[0] = trafficGreenDuration;
-                        trafficReInit(TRAFFIC_GREEN, 0);
-                        break;
-
-                    case TRAFFIC_AMBER:
-                        timerSet(trafficRedDuration * TRAFFIC_SECOND_DURATION / TIMER_DURATION, 2);
-                        led7segNumbers[0] = trafficRedDuration;
-                        trafficReInit(TRAFFIC_RED, 0);
-                        break;
-
-                    case TRAFFIC_GREEN:
-                        timerSet(trafficAmberDuration * TRAFFIC_SECOND_DURATION / TIMER_DURATION, 2);
-                        led7segNumbers[0] = trafficAmberDuration;
-                        trafficReInit(TRAFFIC_AMBER, 0);
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            if (timerFlags[3] == 1) {
-                switch (trafficState[1]) {
-                    case TRAFFIC_RED:
-                        timerSet(trafficGreenDuration * TRAFFIC_SECOND_DURATION / TIMER_DURATION, 3);
-                        led7segNumbers[1] = trafficGreenDuration;
-                        trafficReInit(TRAFFIC_GREEN, 1);
-                        break;
-
-                    case TRAFFIC_AMBER:
-                        timerSet(trafficRedDuration * TRAFFIC_SECOND_DURATION / TIMER_DURATION, 3);
-                        led7segNumbers[1] = trafficRedDuration;
-                        trafficReInit(TRAFFIC_RED, 1);
-                        break;
-
-                    case TRAFFIC_GREEN:
-                        timerSet(trafficAmberDuration * TRAFFIC_SECOND_DURATION / TIMER_DURATION, 3);
-                        led7segNumbers[1] = trafficAmberDuration;
-                        trafficReInit(TRAFFIC_AMBER, 1);
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
             break;
 
         case FSM_RED_MAN:
-            if (timerFlags[1] == 1) {
-                switch (trafficState[0]) {
-                    case TRAFFIC_OFF:
-                        timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
-                        trafficReInit(TRAFFIC_RED, 0);
-                        trafficReInit(TRAFFIC_RED, 1);
-                        break;
-
-                    case TRAFFIC_RED:
-                        timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
-                        trafficReInit(TRAFFIC_OFF, 0);
-                        trafficReInit(TRAFFIC_OFF, 1);
-                        break;
-
-                    default:
-                        break;
+            if (!confirmed && timerFlags[1] == 1) {
+                timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
+                blinkOn = !blinkOn;
+                if (blinkOn) {
+                    led7segSetEnabled(1);
+                    led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
+                    trafficReInit(TRAFFIC_RED, 0);
+                    trafficReInit(TRAFFIC_RED, 1);
+                } else {
+                    led7segSetEnabled(0);
+                    trafficReInit(TRAFFIC_OFF, 0);
+                    trafficReInit(TRAFFIC_OFF, 1);
                 }
             }
-            if (buttonPressed(0)) {
-                    fsmReInitMan(FSM_AMBER_MAN);
-                }
-
-                if (buttonPressed(1)) {
-                    led7segNumbers[1]++;
-                    if (led7segNumbers[1] >= pow(10, LED7SEG_DIGIT_NUMBER)) {
-                        led7segNumbers[1] = 0;
-                    }
-                }
-
-                if (buttonPressed(2)) {
-                    led7segNumbers[1]--;
-                    if (led7segNumbers[1] < 0) {
-                        led7segNumbers[1] = pow(10, LED7SEG_DIGIT_NUMBER) - 1;
-                    }
-                }
-
-                if (buttonPressed(3)) {
-                    trafficRedDuration = led7segNumbers[1];
-                }
-                break;
+            if (buttonPressed(1)) {
+                manualValue++; if (manualValue > led7segMaxValue()) manualValue = 0;
+                led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
+            }
+            if (buttonPressed(2)) {
+                manualValue--; if (manualValue < 0) manualValue = led7segMaxValue();
+                led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
+            }
+            if (buttonPressed(3)) {
+                trafficRedDuration = manualValue;
+                confirmed = 1;
+                led7segSetEnabled(1);
+                led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
+                trafficReInit(TRAFFIC_RED, 0);
+                trafficReInit(TRAFFIC_RED, 1);
+            }
+            if (confirmed && buttonPressed(0)) {
+                fsmReInitMan(FSM_AMBER_MAN);
+            }
+            break;
 
         case FSM_AMBER_MAN:
-            if (timerFlags[1] == 1) {
-                switch (trafficState[0]) {
-                    case TRAFFIC_OFF:
-                        timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
-                        trafficReInit(TRAFFIC_AMBER, 0);
-                        trafficReInit(TRAFFIC_AMBER, 1);
-                        break;
-
-                    case TRAFFIC_AMBER:
-                        timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
-                        trafficReInit(TRAFFIC_OFF, 0);
-                        trafficReInit(TRAFFIC_OFF, 1);
-                        break;
-
-                    default:
-                        break;
+            if (!confirmed && timerFlags[1] == 1) {
+                timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
+                blinkOn = !blinkOn;
+                if (blinkOn) {
+                    led7segSetEnabled(1);
+                    led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
+                    trafficReInit(TRAFFIC_AMBER, 0);
+                    trafficReInit(TRAFFIC_AMBER, 1);
+                } else {
+                    led7segSetEnabled(0);
+                    trafficReInit(TRAFFIC_OFF, 0);
+                    trafficReInit(TRAFFIC_OFF, 1);
                 }
             }
-
-            if (buttonPressed(0)) {
-                fsmReInitMan(FSM_GREEN_MAN);
-            }
-
             if (buttonPressed(1)) {
-                led7segNumbers[1]++;
-                if (led7segNumbers[1] >= pow(10, LED7SEG_DIGIT_NUMBER)) {
-                    led7segNumbers[1] = 0;
-                }
+                manualValue++; if (manualValue > led7segMaxValue()) manualValue = 0;
+                led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
             }
-
             if (buttonPressed(2)) {
-                led7segNumbers[1]--;
-                if (led7segNumbers[1] < 0) {
-                    led7segNumbers[1] = pow(10, LED7SEG_DIGIT_NUMBER) - 1;
-                }
+                manualValue--; if (manualValue < 0) manualValue = led7segMaxValue();
+                led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
             }
-
             if (buttonPressed(3)) {
-                trafficAmberDuration = led7segNumbers[1];
+                trafficAmberDuration = manualValue;
+                confirmed = 1;
+                led7segSetEnabled(1);
+                led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
+                trafficReInit(TRAFFIC_AMBER, 0);
+                trafficReInit(TRAFFIC_AMBER, 1);
+            }
+            if (confirmed && buttonPressed(0)) {
+                fsmReInitMan(FSM_GREEN_MAN);
             }
             break;
 
         case FSM_GREEN_MAN:
-            if (timerFlags[1] == 1) {
-                switch (trafficState[0]) {
-                    case TRAFFIC_OFF:
-                        timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
-                        trafficReInit(TRAFFIC_GREEN, 0);
-                        trafficReInit(TRAFFIC_GREEN, 1);
-                        break;
-
-                    case TRAFFIC_GREEN:
-                        timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
-                        trafficReInit(TRAFFIC_OFF, 0);
-                        trafficReInit(TRAFFIC_OFF, 1);
-                        break;
-
-                    default:
-                        break;
+            if (!confirmed && timerFlags[1] == 1) {
+                timerSet(TRAFFIC_BLINKING_DURATION / TIMER_DURATION, 1);
+                blinkOn = !blinkOn;
+                if (blinkOn) {
+                    led7segSetEnabled(1);
+                    led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
+                    trafficReInit(TRAFFIC_GREEN, 0);
+                    trafficReInit(TRAFFIC_GREEN, 1);
+                } else {
+                    led7segSetEnabled(0);
+                    trafficReInit(TRAFFIC_OFF, 0);
+                    trafficReInit(TRAFFIC_OFF, 1);
                 }
             }
-            if (buttonPressed(0)) {
-                fsmReInitMan(FSM_NORMAL_MAN);
-            }
-
             if (buttonPressed(1)) {
-                led7segNumbers[1]++;
-                if (led7segNumbers[1] >= pow(10, LED7SEG_DIGIT_NUMBER)) {
-                    led7segNumbers[1] = 0;
-                }
+                manualValue++; if (manualValue > led7segMaxValue()) manualValue = 0;
+                led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
             }
-
             if (buttonPressed(2)) {
-                led7segNumbers[1]--;
-                if (led7segNumbers[1] < 0) {
-                    led7segNumbers[1] = pow(10, LED7SEG_DIGIT_NUMBER) - 1;
-                }
+                manualValue--; if (manualValue < 0) manualValue = led7segMaxValue();
+                led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
             }
-
             if (buttonPressed(3)) {
-                trafficGreenDuration = led7segNumbers[1];
+                trafficGreenDuration = manualValue;
+                confirmed = 1;
+                led7segSetEnabled(1);
+                led7segNumbers[0] = manualValue; led7segNumbers[1] = manualValue;
+                trafficReInit(TRAFFIC_GREEN, 0);
+                trafficReInit(TRAFFIC_GREEN, 1);
+            }
+            if (confirmed && buttonPressed(0)) {
+                manualActive = 0;
+                fsmReInitMan(FSM_NORMAL_MAN);
+                fsmReInit(FSM_NORMAL);
             }
             break;
+
         default:
             break;
     }

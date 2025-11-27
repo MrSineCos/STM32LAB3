@@ -102,9 +102,18 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  led7segScanning();
-	  fsmProcessing();
-	  fsmManua();
+    led7segScanning();
+    if (fsmManualIsActive()) {
+      // In manual adjustment: run manual FSM only
+      fsmManua();
+    } else {
+      // Automatic mode
+      fsmProcessing();
+      // Start manual red adjustment when button0 pressed
+      if (buttonPressed(0)) {
+        fsmReInitMan(FSM_RED_MAN);
+      }
+    }
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
