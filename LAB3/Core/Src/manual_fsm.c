@@ -119,7 +119,7 @@ void fsmManua(void) {
                 }
             }
 
-
+            break;
 
         case FSM_RED_MAN:
             if (timerFlags[1] == 1) {
