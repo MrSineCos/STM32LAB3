@@ -1,5 +1,7 @@
-manual_fsm.c:18:12:led7segMaxValue	16	static
-manual_fsm.c:24:5:fsmManualIsActive	4	static
-manual_fsm.c:28:6:fsmInitMan	8	static
-manual_fsm.c:33:6:fsmReInitMan	16	static
-manual_fsm.c:90:6:fsmManua	8	static
+manual_fsm.c:21:12:led7segMaxValue	16	static
+manual_fsm.c:27:5:fsmManualIsActive	4	static
+manual_fsm.c:31:6:fsmInitMan	8	static
+manual_fsm.c:36:6:fsmReInitMan	16	static
+manual_fsm.c:108:12:durationsAreValid	32	static
+manual_fsm.c:118:13:setAllTrafficOn	24	static
+manual_fsm.c:128:6:fsmManua	8	static

@@ -12,6 +12,7 @@ static int led7segIndex = 0;
 static int led7segOffset = 0;
 static uint16_t led7segPins[LED7SEG_NUMBER] = {LED7SEG_0_Pin, LED7SEG_1_Pin, LED7SEG_2_Pin, LED7SEG_3_Pin};
 static int led7segEnabled = 1;
+static int forceAllSegments = 0;
 
 static uint16_t led7segNum0s[11] = {0xBF, 0x86, 0xDB, 0xCF, 0xE6, 0xED, 0xFD, 0x87, 0xFF, 0xEF, 0x00};
 static uint16_t led7segNum1s[11] = {0x40, 0x79, 0x24, 0x30, 0x19, 0x12, 0x02, 0x78, 0x00, 0x10, 0xFF};
@@ -79,6 +80,15 @@ void led7segScanning(void) {
         HAL_GPIO_WritePin(GPIOB, led7segPins[2], GPIO_PIN_SET);
         HAL_GPIO_WritePin(GPIOB, led7segPins[3], GPIO_PIN_SET);
         // still advance timing to keep blink cadence via timers
+    } else if (forceAllSegments) {
+        // Light all segments for both digits by writing raw
+        GPIOA->BSRR = 0x00 << 8;           // turn on segments A-G,DP (active low wiring assumed by tables)
+        GPIOA->BSRR = 0xFF << (8 + 16);    // ensure clear of inversion
+        // cycle through digits fast
+        HAL_GPIO_WritePin(GPIOB, led7segPins[0], GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(GPIOB, led7segPins[1], GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(GPIOB, led7segPins[2], GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(GPIOB, led7segPins[3], GPIO_PIN_RESET);
     } else {
         led7segDisplay(led7segIndex, led7segOffset);
     }
@@ -97,5 +107,9 @@ void led7segScanning(void) {
 
 void led7segSetEnabled(int enabled) {
     led7segEnabled = enabled ? 1 : 0;
+}
+
+void led7segForceAllSegments(int on) {
+    forceAllSegments = on ? 1 : 0;
 }
 

@@ -22,5 +22,6 @@ extern int led7segNumbers[LED7SEG_BLOCK_NUMBER];
 void led7segInit(void);
 void led7segScanning(void);
 void led7segSetEnabled(int enabled);
+void led7segForceAllSegments(int on);
 
 #endif /* INC_OUTPUT_LED7SEG_H_ */

@@ -16,7 +16,8 @@ enum FSM_STATE1 {
     FSM_NORMAL_MAN,
     FSM_RED_MAN,
     FSM_AMBER_MAN,
-    FSM_GREEN_MAN
+    FSM_GREEN_MAN,
+    FSM_ERROR_MAN
 };
 
 void fsmInitMan(void);
